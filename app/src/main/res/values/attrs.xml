@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SliderBarView">
+        <attr name="track_color" format="color" />
+        <attr name="thumb_color" format="color" />
+        <attr name="thumb_size" format="dimension" />
+    </declare-styleable>
+</resources>
