@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.Nullable;
@@ -16,12 +17,14 @@ public class SliderBarView extends View {
     private int mWidth;
     private int mHeight;
     private int contentHeight;
-    private int mThumbSize;
+
+    private int mThumbHeight;
     private int mThumbColor;
     private int mTrackColor;
     private Paint mTrackPaint;
     private Paint mThumbPaint;
     private float mProgress;
+    private boolean touchFlag;
 
     private OnScrollChangeListener onScrollChangeListener;
 
@@ -31,14 +34,14 @@ public class SliderBarView extends View {
 
     public SliderBarView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init( context, attrs);
+        init(context, attrs);
     }
 
-    private void init(Context context, @Nullable AttributeSet attrs){
+    private void init(Context context, @Nullable AttributeSet attrs) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SliderBarView);
         mThumbColor = typedArray.getColor(R.styleable.SliderBarView_thumb_color, Color.BLUE);
         mTrackColor = typedArray.getColor(R.styleable.SliderBarView_track_color, Color.GRAY);
-        mThumbSize = typedArray.getDimensionPixelSize(R.styleable.SliderBarView_thumb_size, 30);
+        mThumbHeight = typedArray.getDimensionPixelSize(R.styleable.SliderBarView_thumb_size, 30);
         typedArray.recycle();
 
         mTrackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -52,45 +55,48 @@ public class SliderBarView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mWidth = getDefaultSize(mThumbSize, widthMeasureSpec);
+        mWidth = getDefaultSize(mThumbHeight, widthMeasureSpec);
         mHeight = getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec);
         setMeasuredDimension(mWidth, mHeight);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawRect(0,0,mWidth, mHeight, mTrackPaint );
-        canvas.drawCircle(mWidth / 2f, getThumbY(), mThumbSize/2f, mThumbPaint);
-    }
-    private float getThumbY(){
-        float maxThumbY = mHeight - mThumbSize/2f;
-        return Math.min(maxThumbY, Math.max(mThumbSize/2f, mProgress * maxThumbY));
+//        canvas.drawRect(0, 0, mWidth, mHeight, mTrackPaint);
+//        canvas.drawCircle(mWidth / 2f, getThumbY(), mThumbSize / 2f, mThumbPaint);
+        canvas.drawRoundRect(0, getThumbY() - mThumbHeight / 2f, mWidth, getThumbY() + mThumbHeight / 2f, 1, 1, mThumbPaint);
     }
 
-    @Override
-    public boolean performClick() {
-        super.performClick();
-        return true;
+    private float getThumbY() {
+        float maxThumbY = mHeight - mThumbHeight / 2f;
+        return Math.min(maxThumbY, Math.max(mThumbHeight / 2f, mProgress * maxThumbY));
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()){
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                touchFlag = true;
+                setVisibility(VISIBLE);
+                mProgress = event.getY() / mHeight;
+                postInvalidate();
                 return true;
             case MotionEvent.ACTION_MOVE:
-                mProgress = event.getY() / (mHeight-mThumbSize);
+                touchFlag = true;
+                setVisibility(VISIBLE);
+                mProgress = event.getY() / (mHeight - mThumbHeight);
                 postInvalidate();
                 // 计算滑动距离
-                int scrollDistance =(int) (mProgress*mHeight) *(contentHeight / mHeight);
-                if(onScrollChangeListener != null){
+                int scrollDistance = (int) (mProgress * contentHeight);
+                if (onScrollChangeListener != null) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         onScrollChangeListener.onScrollChange(scrollDistance);
                     }
                 }
-
+                return true;
             case MotionEvent.ACTION_UP:
-                performClick();
+                touchFlag = false;
+                postDelayed(() -> setVisibility(INVISIBLE), 3000);
                 return true;
             default:
                 return super.onTouchEvent(event);
@@ -101,18 +107,28 @@ public class SliderBarView extends View {
         void onScrollChange(int scrollDistance);
     }
 
-    public void setOnScrollChangeListener(OnScrollChangeListener listener){
+    public void setOnScrollChangeListener(OnScrollChangeListener listener) {
         this.onScrollChangeListener = listener;
     }
 
-    public void setProgress(float progress){
+    public void setProgress(float progress) {
         mProgress = progress;
         postInvalidate();
     }
 
-    public void setScroll(int contentHeight, int mHeight){
+    public void setScroll(int contentHeight, int mHeight) {
         this.contentHeight = contentHeight;
         this.mHeight = mHeight;
         postInvalidate();
+    }
+
+    public void setHide() {
+        if (!touchFlag) {
+            postDelayed(() -> setVisibility(INVISIBLE), 3000);
+        }
+    }
+
+    public void setThumbHeight(int height) {
+        mThumbHeight = height;
     }
 }
