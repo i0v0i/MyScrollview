@@ -5,12 +5,14 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 
 public class SliderBarView extends View {
     private String TAG = "SliderBarView";
@@ -26,6 +28,8 @@ public class SliderBarView extends View {
     private float mProgress;
     private boolean touchFlag;
 
+    private Drawable mThumbDrawable;
+
     private OnScrollChangeListener onScrollChangeListener;
 
     public SliderBarView(Context context) {
@@ -38,19 +42,21 @@ public class SliderBarView extends View {
     }
 
     private void init(Context context, @Nullable AttributeSet attrs) {
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SliderBarView);
-        mThumbColor = typedArray.getColor(R.styleable.SliderBarView_thumb_color, Color.BLUE);
-        mTrackColor = typedArray.getColor(R.styleable.SliderBarView_track_color, Color.GRAY);
-        mThumbHeight = typedArray.getDimensionPixelSize(R.styleable.SliderBarView_thumb_size, 30);
-        typedArray.recycle();
-
-        mTrackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mTrackPaint.setColor(mTrackColor);
-        mTrackPaint.setStyle(Paint.Style.FILL);
-
-        mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mThumbPaint.setColor(mThumbColor);
-        mThumbPaint.setStyle(Paint.Style.FILL);
+//        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SliderBarView);
+//        mThumbColor = typedArray.getColor(R.styleable.SliderBarView_thumb_color, Color.BLUE);
+//        mTrackColor = typedArray.getColor(R.styleable.SliderBarView_track_color, Color.GRAY);
+//        mThumbHeight = typedArray.getDimensionPixelSize(R.styleable.SliderBarView_thumb_size, 30);
+//        typedArray.recycle();
+//
+//        mTrackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+//        mTrackPaint.setColor(mTrackColor);
+//        mTrackPaint.setStyle(Paint.Style.FILL);
+//
+//        mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+//        mThumbPaint.setColor(mThumbColor);
+//        mThumbPaint.setStyle(Paint.Style.FILL);
+        // 此处修改 R.drawable.thumb 即可
+        mThumbDrawable  = AppCompatResources.getDrawable(context, R.drawable.thumb);
     }
 
     @Override
@@ -64,7 +70,9 @@ public class SliderBarView extends View {
     protected void onDraw(Canvas canvas) {
 //        canvas.drawRect(0, 0, mWidth, mHeight, mTrackPaint);
 //        canvas.drawCircle(mWidth / 2f, getThumbY(), mThumbSize / 2f, mThumbPaint);
-        canvas.drawRoundRect(0, getThumbY() - mThumbHeight / 2f, mWidth, getThumbY() + mThumbHeight / 2f, 1, 1, mThumbPaint);
+//        canvas.drawRoundRect(0, getThumbY() - mThumbHeight / 2f, mWidth, getThumbY() + mThumbHeight / 2f, 1, 1, mThumbPaint);
+        mThumbDrawable.setBounds(0, (int)(getThumbY() - mThumbHeight / 2f), mWidth, (int) (getThumbY() + mThumbHeight / 2f));
+        mThumbDrawable.draw(canvas);
     }
 
     private float getThumbY() {

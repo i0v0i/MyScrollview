@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/some_code/java_code/scrollview/app/src/main/res/drawable/ic_launcher_background.xml" value="0.4755" />
+        <entry key="..\:/some_code/java_code/scrollview/app/src/main/res/drawable/thumb.xml" value="0.4775" />
         <entry key="..\:/some_code/java_code/scrollview/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/some_code/java_code/scrollview/app/src/main/res/layout/my_srcollview.xml" value="0.2798913043478261" />
       </map>
