@@ -9,6 +9,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+
 @SuppressLint("ClickableViewAccessibility")
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
@@ -16,8 +17,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView2;
     private ScrollView scrollView;
     private SliderBarView sliderBarView;
+    private int thumbHeight;
     private int height;
     private int contentHeight;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         scrollView = findViewById(R.id.sv);
         sliderBarView = findViewById(R.id.sb);
         StringBuilder tmp = new StringBuilder();
-        for(int i=0; i < 100 ; i++){
+        for (int i = 0; i < 40; i++) {
             tmp.append("Android：深度探究线性布局LinearLayout中权重（layout_weight）属性");
         }
         textView.setText(tmp.toString());
@@ -44,9 +47,8 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "height " + height);
             Log.e(TAG, "contentHeight " + contentHeight);
             // 设置滚动条高度和scrollview内容最大高度
-            sliderBarView.setScroll(contentHeight-height, height);
-            // 设置滑块的高度，这里自适应scrollview内容最大高度的十分之一
-            sliderBarView.setThumbHeight((contentHeight-height)/10);
+            sliderBarView.setScroll(contentHeight , height);
+
         });
 
         // 监听触摸事件，设置滚动条可见
@@ -70,10 +72,7 @@ public class MainActivity extends AppCompatActivity {
         // 监听scrollview 滚动变换事件，拖动滑块
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             scrollView.setOnScrollChangeListener((view, x, y, x2, y2) -> {
-                float c = contentHeight - height;
-                float h = height;
-                float progress = (float) y * (h/c) / h;
-                sliderBarView.setProgress(progress);
+                sliderBarView.setViewScrollY(y);
             });
         }
     }

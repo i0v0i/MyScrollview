@@ -19,15 +19,9 @@ public class SliderBarView extends View {
     private int mWidth;
     private int mHeight;
     private int contentHeight;
-
     private int mThumbHeight;
-    private int mThumbColor;
-    private int mTrackColor;
-    private Paint mTrackPaint;
-    private Paint mThumbPaint;
     private float mProgress;
     private boolean touchFlag;
-
     private Drawable mThumbDrawable;
 
     private OnScrollChangeListener onScrollChangeListener;
@@ -42,21 +36,7 @@ public class SliderBarView extends View {
     }
 
     private void init(Context context, @Nullable AttributeSet attrs) {
-//        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SliderBarView);
-//        mThumbColor = typedArray.getColor(R.styleable.SliderBarView_thumb_color, Color.BLUE);
-//        mTrackColor = typedArray.getColor(R.styleable.SliderBarView_track_color, Color.GRAY);
-//        mThumbHeight = typedArray.getDimensionPixelSize(R.styleable.SliderBarView_thumb_size, 30);
-//        typedArray.recycle();
-//
-//        mTrackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//        mTrackPaint.setColor(mTrackColor);
-//        mTrackPaint.setStyle(Paint.Style.FILL);
-//
-//        mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//        mThumbPaint.setColor(mThumbColor);
-//        mThumbPaint.setStyle(Paint.Style.FILL);
-        // 此处修改 R.drawable.thumb 即可
-        mThumbDrawable  = AppCompatResources.getDrawable(context, R.drawable.thumb);
+        mThumbDrawable = AppCompatResources.getDrawable(context, R.drawable.thumb);
     }
 
     @Override
@@ -68,16 +48,18 @@ public class SliderBarView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-//        canvas.drawRect(0, 0, mWidth, mHeight, mTrackPaint);
-//        canvas.drawCircle(mWidth / 2f, getThumbY(), mThumbSize / 2f, mThumbPaint);
-//        canvas.drawRoundRect(0, getThumbY() - mThumbHeight / 2f, mWidth, getThumbY() + mThumbHeight / 2f, 1, 1, mThumbPaint);
-        mThumbDrawable.setBounds(0, (int)(getThumbY() - mThumbHeight / 2f), mWidth, (int) (getThumbY() + mThumbHeight / 2f));
+        mThumbDrawable.setBounds(0, (int) (getThumbY() - mThumbHeight / 2f), mWidth, (int) (getThumbY() + mThumbHeight / 2f));
         mThumbDrawable.draw(canvas);
     }
 
     private float getThumbY() {
-        float maxThumbY = mHeight - mThumbHeight / 2f;
-        return Math.min(maxThumbY, Math.max(mThumbHeight / 2f, mProgress * maxThumbY));
+        float maxThumbY = mHeight - mThumbHeight;
+        if (mProgress > 1f) {
+            mProgress = 1f;
+        } else if (mProgress < 0f) {
+            mProgress = 0f;
+        }
+        return mThumbHeight / 2f + mProgress * maxThumbY;
     }
 
     @Override
@@ -85,17 +67,13 @@ public class SliderBarView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touchFlag = true;
-                setVisibility(VISIBLE);
-                mProgress = event.getY() / mHeight;
-                postInvalidate();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 touchFlag = true;
-                setVisibility(VISIBLE);
-                mProgress = event.getY() / (mHeight - mThumbHeight);
-                postInvalidate();
+                mProgress = (event.getY() - mThumbHeight / 2f) / (mHeight - mThumbHeight / 2f);
+                invalidate();
                 // 计算滑动距离
-                int scrollDistance = (int) (mProgress * contentHeight);
+                int scrollDistance = (int) (mProgress * (contentHeight - mHeight));
                 if (onScrollChangeListener != null) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         onScrollChangeListener.onScrollChange(scrollDistance);
@@ -114,29 +92,32 @@ public class SliderBarView extends View {
     public interface OnScrollChangeListener {
         void onScrollChange(int scrollDistance);
     }
-
     public void setOnScrollChangeListener(OnScrollChangeListener listener) {
         this.onScrollChangeListener = listener;
     }
 
-    public void setProgress(float progress) {
-        mProgress = progress;
-        postInvalidate();
+    public void setViewScrollY(float scrollY) {
+        mProgress = scrollY / (float) (contentHeight - mHeight);
+        invalidate();
     }
-
     public void setScroll(int contentHeight, int mHeight) {
         this.contentHeight = contentHeight;
         this.mHeight = mHeight;
-        postInvalidate();
+        // 自适应计算滑动高度
+        int h = contentHeight - mHeight;
+        if (h < 0) {
+            mThumbHeight = mHeight;
+        } else if (h < mHeight) {
+            mThumbHeight = mHeight - h;
+        } else {
+            mThumbHeight = (int) (mHeight * ((float) mHeight / (float) h));
+        }
+        invalidate();
     }
 
     public void setHide() {
         if (!touchFlag) {
             postDelayed(() -> setVisibility(INVISIBLE), 3000);
         }
-    }
-
-    public void setThumbHeight(int height) {
-        mThumbHeight = height;
     }
 }

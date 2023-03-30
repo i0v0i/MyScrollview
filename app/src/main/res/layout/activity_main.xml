@@ -18,7 +18,8 @@
         <ScrollView
                 android:layout_width="800dp"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
+                android:scrollbarSize="10dp"
+                android:background="#4682B4"
                 android:id="@+id/sv">
             <LinearLayout
                     android:layout_width="wrap_content"
@@ -38,8 +39,6 @@
                 android:layout_width="30dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/sb"
-                app:thumb_color="#A9A9A9"
-                app:track_color="#4682B4"
                 app:thumb_size="30dp"/>
 
     </LinearLayout>
