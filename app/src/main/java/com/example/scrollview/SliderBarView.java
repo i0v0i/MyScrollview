@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,6 +24,7 @@ public class SliderBarView extends View {
     private float mProgress;
     private boolean touchFlag;
     private Drawable mThumbDrawable;
+    private Runnable hideRunnable;
 
     private OnScrollChangeListener onScrollChangeListener;
 
@@ -82,7 +84,7 @@ public class SliderBarView extends View {
                 return true;
             case MotionEvent.ACTION_UP:
                 touchFlag = false;
-                postDelayed(() -> setVisibility(INVISIBLE), 3000);
+                setHide();
                 return true;
             default:
                 return super.onTouchEvent(event);
@@ -116,8 +118,17 @@ public class SliderBarView extends View {
     }
 
     public void setHide() {
-        if (!touchFlag) {
-            postDelayed(() -> setVisibility(INVISIBLE), 3000);
+        if(hideRunnable != null){
+            removeCallbacks(hideRunnable);
+            Log.e(TAG, "hide removeCallbacks" );
         }
+        hideRunnable= () -> {
+            Log.e(TAG, "hideRunnable" );
+            if (!touchFlag) {
+                setVisibility(INVISIBLE);
+            }
+        };
+        postDelayed(hideRunnable,3000);
     }
+
 }
